@@ -2,6 +2,7 @@
 import binascii
 import hashlib
 from passlib.hash import mysql323, mysql41, mssql2000, mssql2005, postgres_md5, oracle10, oracle11
+from passlib.hash import lmhash,nthash,msdcc,msdcc2
 
 R ="\033[1;31m";
 Y ="\033[1;33m";
@@ -35,3 +36,10 @@ print("postgres_md5 :",C,postgres_md5.hash(utf_password, user=utf_username),W)
 print("mysql323     :",C,oracle10.hash(utf_password,user=utf_username),W)
 print("mysql323     :",C,oracle11.hash(utf_password),W)
 print("\n")
+
+# modern versions of windows have different accounts including NTLM and MSCASH
+# NTLM (C/SYSTEM32/CONFIG/SAM) hashes are used for local accounts and MSCASH (C/SYSTEM32/CONFIG/SECURITY) hashes are used for domain accounts
+print("Windows LM hash      :",C,lmhash.hash(utf_password),W)
+print("Windows LM hash      :",C,nthash.hash(utf_password),W)
+print("Windows LM hash      :",C,msdcc.hash(utf_password,user=utf_username),W)
+print("Windows LM hash      :",C,msdcc2.hash(utf_password,user=utf_username),W)
