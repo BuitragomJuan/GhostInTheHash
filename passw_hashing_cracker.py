@@ -3,6 +3,9 @@ import binascii
 import hashlib
 from passlib.hash import mysql323, mysql41, mssql2000, mssql2005, postgres_md5, oracle10, oracle11
 from passlib.hash import lmhash,nthash,msdcc,msdcc2
+from passlib.hash import pbkdf2_sha256,pbkdf2_sha512,sha512_crypt,sha256_crypt,bcrypt
+from os import urandom
+import time
 
 R ="\033[1;31m";
 Y ="\033[1;33m";
@@ -40,6 +43,31 @@ print("\n")
 # modern versions of windows have different accounts including NTLM and MSCASH
 # NTLM (C/SYSTEM32/CONFIG/SAM) hashes are used for local accounts and MSCASH (C/SYSTEM32/CONFIG/SECURITY) hashes are used for domain accounts
 print("Windows LM hash      :",C,lmhash.hash(utf_password),W)
-print("Windows LM hash      :",C,nthash.hash(utf_password),W)
-print("Windows LM hash      :",C,msdcc.hash(utf_password,user=utf_username),W)
-print("Windows LM hash      :",C,msdcc2.hash(utf_password,user=utf_username),W)
+print("Windows NT hash      :",C,nthash.hash(utf_password),W)
+print("Windows MSCCASH hash :",C,msdcc.hash(utf_password,user=utf_username),W)
+print("Windows MSCASH2 hash :",C,msdcc2.hash(utf_password,user=utf_username),W)
+
+# generate a random salt
+salt = urandom(32) # size is 32 bytes
+decoded_salt = binascii.b2a_base64(salt).decode().strip()
+decoded_salt = decoded_salt.replace("+",".").replace("=","")
+print("salt :",decoded_salt)
+print("\n")
+
+T1 = time.time()
+print("pbkdf2 :",C,pbkdf2_sha256.hash(utf_password,rounds=100000,salt=salt),R,time.time() - T1,W,"seconds")
+T1 = time.time()
+print("pbkdf2 :",C,pbkdf2_sha512.hash(utf_password,rounds=100000,salt=salt),R,time.time() - T1,W,"seconds")
+
+sha512_crypt_salt = decoded_salt[:16]
+T1 = time.time()
+print("sha512_crypt :",C,sha512_crypt.hash(utf_password,rounds=8000,salt=sha512_crypt_salt),R,time.time() - T1,W,"seconds")
+T1 = time.time()
+print("sha256_crypt:",C,sha256_crypt.hash(utf_password,rounds=8000,salt=sha512_crypt_salt),R,time.time() - T1,W,"seconds")
+
+bsd_salt = decoded_salt[:22]
+bsd_salt = bsd_salt.replace(bsd_salt[21],".")
+T1 = time.time()
+print("bcrypt :",C,bcrypt.hash(utf_password,rounds=12,salt=bsd_salt),R,time.time() - T1,W,"seconds")
+
+
