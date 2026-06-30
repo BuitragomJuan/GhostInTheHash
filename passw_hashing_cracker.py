@@ -90,7 +90,7 @@ def password_crack(password_hash,hashing_algorithm,hashing_algorithms_1,hashing_
                         print("\nfound credentials:",C,password,W)
                         q.task_done() # Indicate that a formerly enqueued task is complete
                         # we need to stop all the threads once the good password is found 
-                        with q.mutex: q.queue.clear(); q.all_tasks_done-notify_all(); q.unfinished_tasks = 0
+                        with q.mutex: q.queue.clear(); q.all_tasks_done.notify_all(); q.unfinished_tasks = 0
                         return
                 except:
                     pass
@@ -130,7 +130,7 @@ def main(mode,password,passwordhash,hashing_algorithm,n_threads,wordlist,usernam
         except:
             print(R,"Error: dictionary file not found",W)
             sys.exit()
-        if hashing_algorithm not in hashin_algorithms_1 and hashing_algorithm not in hashing_algorithms_2 and hashing_algorithm not in hashing_algorithms_3:
+        if hashing_algorithm not in hashing_algorithms_1 and hashing_algorithm not in hashing_algorithms_2 and hashing_algorithm not in hashing_algorithms_3:
             print(R,"Error: invalid hashing algorithm",W)
             sys.exit()
         if hashing_algorithm in hashing_algorithms_3 and username_salt == None:
@@ -143,9 +143,9 @@ def main(mode,password,passwordhash,hashing_algorithm,n_threads,wordlist,usernam
             worker = threading.Thread(target=password_crack, args=(passwordhash,hashing_algorithm,hashing_algorithms_1,hashing_algorithms_2,username_salt))
             worker.daemon = True # daemon thread means a thread that will end when the main thread ends
             worker.start()  # start the new thread
-        else:
-            print(R,"mode can be only hashing or cracking",W)
-            sys.exit()
+    else:
+        print(R,"mode can be only hashing or cracking",W)
+        sys.exit()
 
 
 if __name__=="__main__":
@@ -153,7 +153,7 @@ if __name__=="__main__":
     parser.add_argument("-m", "--mode",                 help="hashing or cracking mode")
     parser.add_argument("-p", "--password",             help="password to be hashed")
     parser.add_argument("-s", "--passwordhash",         help="password hash to be cracked")
-    parser.add_argument("-a", "--hashing_algorithm",    help="hashing algorithm to be used for cracking ['md4','md5','sha1','ripemd160','sha224','sha3_224','sha256',sha3_]")
+    parser.add_argument("-a", "--hashing_algorithm",    help="hashing algorithm to be used for cracking ['md5','sha1','ripemd160','sha224','sha3_224','sha256','sha3_256','blake2s256','sm3','sha384','sha3_384','sha512','sha3_512','whirlpool','blake2b512','lmhash','nthash','pbkdf2_sha256','pbkdf2_sha512','sha256_crypt','sha512_crypt','bcrypt','bcrypt_sha256','mysql323','mysql41','mssql2000','md5_crypt','cisco_asa','msdcc','msdcc2','postgres_md5','oracle10','oracle11']")
     parser.add_argument("-w", "--wordlist",             help="Dictionary File to be used for password hash cracking")
     parser.add_argument("-t", "--num-threads",          help="Number of threads to use to bruteforce the login-page. DEfault is 1", default=1, type=int)
     parser.add_argument("-u", "--username_salt",        help="username to be used as a slat in hashing functions like mscache, postgreql and oracle")
