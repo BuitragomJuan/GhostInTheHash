@@ -3,7 +3,7 @@
 from os import urandom
 import binascii
 from Crypto.Cipher import AES
-
+import argparse
 # AES encryption, with CBF mode
 # AES KEY: 32 bytes
 # AES IV: 16 bytes
@@ -31,7 +31,33 @@ def aes_decrypt(ciphertext,AES_KEY,AES_IV):
     plaintext = AES_Cipher.decrypt(ciphertext)
     print("plaintext: ",plaintext.decode())
 
-# aes_generate_key_iv()
-aes_encrypt("secret message to be encrypted","805f11b3c04841db3de9534fd156f09ea99198b49f0ec647375765dcddd3ec8f","8e81ef21c8b3cffd1ab979dcacd02b26")
-aes_decrypt("7b0a030d9a088a6f7630e90b578e9e3f1f9905c74a43c9fb7300a100e6bb","805f11b3c04841db3de9534fd156f09ea99198b49f0ec647375765dcddd3ec8f","8e81ef21c8b3cffd1ab979dcacd02b26")
+def main(mode,plaintext,AES_KEY,AES_IV,ciphertext):
+    if mode == "aes_generate_key_iv":
+        aes_generate_key_iv()
 
+    elif mode == "aes_encrypt":
+        aes_encrypt(plaintext,AES_KEY,AES_IV)
+    elif mode == "aes_decrypt":
+        aes_decrypt(ciphertext,AES_KEY,AES_IV)
+    else:
+        print("Invalid mode typed")
+        exit(1)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Encryption and Decryptio using AES")
+    parser.add_argument("-m","--mode",help="mode can only be: aes_generate_key_iv,aes_encrypt and aes_decrypt")
+    parser.add_argument("-p","--plaintext",help="data to be encryptes")
+    parser.add_argument("-c","--ciphertext",help="data to be decrypted")
+    parser.add_argument("-k","--aes_key",help="AES_KEY of size 32 bytes in hexadecimal format")
+    parser.add_argument("-i","--aes_iv",help="AES_IV of size 16 bytes in hevadecimal format")
+
+    # get the value of this option
+    args       = parser.parse_args()
+    mode       = args.mode
+    plaintext  = args.plaintext
+    ciphertext = args.ciphertext
+    AES_KEY    = args.aes_key
+    AES_IV     = args.aes_iv
+
+    main(mode=mode,plaintext=plaintext,AES_KEY=AES_KEY,AES_IV=AES_IV,ciphertext=ciphertext)
+    exit(0)
