@@ -1,7 +1,8 @@
 #!usr/bin/python
 
 from Crypto.PublicKey import RSA
-
+import os,binascii
+from Crypto.Cipher import PKCS1_OAEP
 def RSA_KEY_generate(key_size):
     try:
         # generate RSA key of size key:size in bits
@@ -25,4 +26,15 @@ def RSA_KEY_generate(key_size):
         print("Error: ",e)
         exit(1)
 
-RSA_KEY_generate(2048)
+# RSA_KEY_generate(2048)
+
+session_key = os.urandom(32)
+print("session_key:",binascii.b2a_hex(session_key).decode())
+
+# get public key
+public_key = RSA.import_key(open("/home/uitr/bash_EH/RSA_keys/public_key.pem").read())
+
+# construct rsa cipher object
+rsa_cipher = PKCS1_OAEP.new(public_key)
+encrypted_session_key = rsa_cipher.encrypt(session_key)
+print("encrypted_session_key:",binascii.b2a_hex(encrypted_session_key).decode())
